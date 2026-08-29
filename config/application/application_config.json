@@ -1,0 +1,5 @@
+{
+  "app_version": "0.1.0",
+  "environment": "development",
+  "log_level": "debug"
+} 
