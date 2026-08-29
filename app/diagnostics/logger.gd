@@ -47,12 +47,16 @@ func _write(level: Level, category: String, message: String) -> void:
 
 func _timestamp() -> String:
     var t: Dictionary = Time.get_datetime_dict_from_system()
-    return "%02d:%02d:%02d.%03d" % [
-        int(t.hour),
-        int(t.minute),
-        int(t.second),
-        int(t.millisecond)
-    ]
+    var hour := _get_int(t, "hour", 0)
+    var minute := _get_int(t, "minute", 0)
+    var second := _get_int(t, "second", 0)
+    var millisecond := _get_int(t, "millisecond", int(Time.get_ticks_msec() % 1000))
+    return "%02d:%02d:%02d.%03d" % [hour, minute, second, millisecond]
+
+func _get_int(dict: Dictionary, key: String, fallback: int) -> int:
+    if dict.has(key):
+        return int(dict[key])
+    return fallback
 
 func _level_name(level: Level) -> String:
     match level:
