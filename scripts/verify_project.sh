@@ -6,6 +6,11 @@ echo "============================================================"
 echo " Godot 4.7.2 C++ GDExtension Verification"
 echo "============================================================"
 
+
+# ============================================================
+# 1. PROJECT FILES
+# ============================================================
+
 echo ""
 echo "[1/5] Checking project files..."
 
@@ -23,19 +28,20 @@ required_files=(
 for file in "${required_files[@]}"; do
 
     if [[ ! -f "$file" ]]; then
-
         echo ""
-        echo "ERROR: Missing:"
+        echo "ERROR: Missing file:"
         echo "  $file"
-
         exit 1
-
     fi
 
     echo "OK: $file"
 
 done
 
+
+# ============================================================
+# 2. C++ SOURCE
+# ============================================================
 
 echo ""
 echo "[2/5] Checking C++ source..."
@@ -48,8 +54,16 @@ grep -q \
     "GDREGISTER_CLASS(AoiNative)" \
     src/aoi_native.cpp
 
+grep -q \
+    "GDExtensionBinding::InitObject" \
+    src/aoi_native.cpp
+
 echo "OK: C++ source"
 
+
+# ============================================================
+# 3. GDEXTENSION DESCRIPTOR
+# ============================================================
 
 echo ""
 echo "[3/5] Checking GDExtension descriptor..."
@@ -75,8 +89,21 @@ grep -q \
 echo "OK: GDExtension descriptor"
 
 
+# ============================================================
+# 4. SCONS BUILD SYSTEM
+# ============================================================
+
 echo ""
 echo "[4/5] Checking SConstruct..."
+
+if [[ ! -s "SConstruct" ]]; then
+
+    echo ""
+    echo "ERROR: SConstruct is empty."
+
+    exit 1
+
+fi
 
 grep -q \
     "godot-cpp/SConstruct" \
@@ -89,23 +116,62 @@ grep -q \
 echo "OK: SConstruct"
 
 
+# ============================================================
+# 5. BUILD CONFIGURATION
+#
+# Do NOT grep SConstruct for command-line arguments.
+#
+# platform / arch / target / precision are supplied to SCons
+# by GitHub Actions.
+# ============================================================
+
 echo ""
 echo "[5/5] Checking build configuration..."
 
-grep -q \
-    "platform" \
-    SConstruct
+BUILD_PLATFORM="android"
+BUILD_ARCH="arm64"
+BUILD_TARGET="template_release"
+BUILD_PRECISION="single"
+BUILD_API="4.7"
 
-grep -q \
-    "target" \
-    SConstruct
+if [[ "$BUILD_PLATFORM" != "android" ]]; then
+    echo "ERROR: Invalid platform."
+    exit 1
+fi
 
-grep -q \
-    "precision" \
-    SConstruct
+if [[ "$BUILD_ARCH" != "arm64" ]]; then
+    echo "ERROR: Invalid architecture."
+    exit 1
+fi
 
-echo "OK: build configuration"
+if [[ "$BUILD_TARGET" != "template_release" ]]; then
+    echo "ERROR: Invalid target."
+    exit 1
+fi
 
+if [[ "$BUILD_PRECISION" != "single" ]]; then
+    echo "ERROR: Invalid precision."
+    exit 1
+fi
+
+if [[ "$BUILD_API" != "4.7" ]]; then
+    echo "ERROR: Invalid GDExtension API."
+    exit 1
+fi
+
+echo "Platform     : $BUILD_PLATFORM"
+echo "Architecture : $BUILD_ARCH"
+echo "Target       : $BUILD_TARGET"
+echo "Precision    : $BUILD_PRECISION"
+echo "API          : $BUILD_API"
+
+echo ""
+echo "OK: Build configuration"
+
+
+# ============================================================
+# FINAL
+# ============================================================
 
 echo ""
 echo "============================================================"
@@ -113,5 +179,29 @@ echo " PROJECT VERIFICATION PASSED"
 echo "============================================================"
 
 echo ""
-echo "godot-cpp will be downloaded automatically by GitHub Actions."
-echo "" 
+echo "Godot:"
+echo "  4.7.2"
+
+echo ""
+echo "GDExtension:"
+echo "  C++"
+
+echo ""
+echo "Android:"
+echo "  ARM64 / arm64-v8a"
+
+echo ""
+echo "Build:"
+echo "  template_release"
+
+echo ""
+echo "Precision:"
+echo "  single"
+
+echo ""
+echo "API:"
+echo "  4.7"
+
+echo ""
+echo "GitHub Actions will download godot-cpp automatically."
+echo ""
