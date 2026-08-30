@@ -217,22 +217,17 @@ jobs:
 
           set -euo pipefail
 
-          echo "Checking supported API versions..."
+          echo "Checking godot-cpp API 4.7 support..."
 
-          grep -n \
-            'supported_api_versions' \
-            godot-cpp/tools/godotcpp.py
-
-          echo ""
-
-          grep -n \
+          grep -q \
             '"4.7"' \
             godot-cpp/tools/godotcpp.py
 
+          echo "godot-cpp supports API 4.7."
+
           echo ""
-
-          echo "godot-cpp API 4.7 verified."
-
+          echo "Using API target:"
+          echo "${GODOT_CPP_API_VERSION}"
 
       # ==========================================================
       # 10 - VERIFY PROJECT STRUCTURE
