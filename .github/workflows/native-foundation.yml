@@ -1,0 +1,108 @@
+name: Native Foundation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows-native:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Ensure godot-cpp
+        shell: bash
+        run: bash native/extension/ensure_godot_cpp.sh
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SCons
+        run: python -m pip install scons
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Build Windows Debug
+        working-directory: native/extension
+        run: scons -j2 platform=windows target=template_debug arch=x86_64
+
+      - name: Build Windows Release
+        working-directory: native/extension
+        run: scons -j2 platform=windows target=template_release arch=x86_64
+
+      - name: Upload Windows Native Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows
+          path: native/extension/bin/*.dll
+
+  android-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Ensure godot-cpp
+        shell: bash
+        run: bash native/extension/ensure_godot_cpp.sh
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SCons
+        run: python -m pip install scons
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK and platforms
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "platform-tools" "platforms;android-34" "ndk;26.1.10909125"
+
+      - name: Export Android environment
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+
+      - name: Build Android Debug arm64
+        working-directory: native/extension
+        run: scons -j2 platform=android target=template_debug arch=arm64 android_api_level=34
+
+      - name: Build Android Release arm64
+        working-directory: native/extension
+        run: scons -j2 platform=android target=template_release arch=arm64 android_api_level=34
+
+      - name: Upload Android Native Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-android
+          path: native/extension/bin/*.so 
