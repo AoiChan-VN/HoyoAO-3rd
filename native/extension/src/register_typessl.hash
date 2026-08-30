@@ -1,0 +1,9 @@
+#ifndef NATIVE_HASH_REGISTER_TYPES_H
+#define NATIVE_HASH_REGISTER_TYPES_H
+
+#include <godot_cpp/core/class_db.hpp>
+
+void initialize_native_extension_module(godot::ModuleInitializationLevel p_level);
+void uninitialize_native_extension_module(godot::ModuleInitializationLevel p_level);
+
+#endif 
