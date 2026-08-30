@@ -1,7 +1,16 @@
 #!python
 import os
 
-env = SConscript("godot-cpp/SConstruct")
+godot_cpp_sconstruct = os.path.join("godot-cpp", "SConstruct")
+
+if not os.path.exists(godot_cpp_sconstruct):
+    raise Exception(
+        "godot-cpp is missing. "
+        "Run 'git submodule update --init --recursive' "
+        "or clone godot-cpp into native/extension/godot-cpp."
+    )
+
+env = SConscript(godot_cpp_sconstruct)
 env.Append(CPPPATH=[os.path.join(os.getcwd(), "src")])
 
 sources = Glob("src/*.cpp")
@@ -25,4 +34,4 @@ else:
     lib_name = "native_hash.{}.{}.{}".format(platform, config, arch)
 
 library = env.SharedLibrary(target=os.path.join("bin", lib_name), source=sources)
-Default(library) 
+Default(library)
