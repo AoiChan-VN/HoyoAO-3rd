@@ -1,1 +1,27 @@
+project:
+  godot: "4.7.2-stable"
+  godot_cpp_api: "4.7"
+  language: "C++"
+  extension: "GDExtension"
 
+android:
+  primary_abi: "arm64-v8a"
+  scons_arch: "arm64"
+  target: "template_release"
+  precision: "single"
+  renderer: "gl_compatibility"
+  min_sdk: 24
+  compile_sdk: 35
+  ndk: "28.0.13004108"
+  jdk: 17
+
+optimization:
+  lto: "toolchain-dependent / do not force globally"
+  symbols: "separate debug-symbol builds for profiling"
+  exceptions: "follow godot-cpp defaults"
+  rtti: "follow godot-cpp defaults"
+  precision: "single"
+
+output:
+  library: "project/bin/android/libaoi_native.android.template_release.arm64.so"
+  descriptor: "project/bin/aoi_native.gdextension"
