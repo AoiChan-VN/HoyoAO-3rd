@@ -1,0 +1,80 @@
+name: Native Foundation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows-native:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SCons
+        run: python -m pip install scons
+
+      - name: Build Windows Debug
+        working-directory: native/extension
+        run: scons platform=windows target=template_debug arch=x86_64
+
+      - name: Build Windows Release
+        working-directory: native/extension
+        run: scons platform=windows target=template_release arch=x86_64
+
+      - name: Upload Windows Native Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows
+          path: native/extension/bin/*.dll
+
+  android-native:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SCons
+        run: python -m pip install scons
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: r26b
+
+      - name: Build Android Debug arm64
+        working-directory: native/extension
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+          ANDROID_HOME: /usr/local/lib/android/sdk
+        run: scons platform=android target=template_debug arch=arm64 android_api_level=34 android_sdk_path=/usr/local/lib/android/sdk
+
+      - name: Build Android Release arm64
+        working-directory: native/extension
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+          ANDROID_HOME: /usr/local/lib/android/sdk
+        run: scons platform=android target=template_release arch=arm64 android_api_level=34 android_sdk_path=/usr/local/lib/android/sdk
+
+      - name: Upload Android Native Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-android
+          path: native/extension/bin/*.so 
