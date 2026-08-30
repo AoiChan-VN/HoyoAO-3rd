@@ -310,7 +310,7 @@ jobs:
           echo "=========================================================="
 
           echo "Godot       : ${GODOT_VERSION}"
-          echo "godot-cpp   : ${GODOT_CPP_REF}"
+          echo "godot-cpp   : ${GODOT_CPP_BRANCH}"
           echo "Platform    : ${PLATFORM}"
           echo "Architecture: ${ARCH}"
           echo "Target      : ${TARGET}"
