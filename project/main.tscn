@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource path="res://bin/aoi_native.gdextension" type="Resource" id="1"]
-
-[node name="Main" type="Node3D"]
