@@ -14,7 +14,8 @@ permissions:
 
 env:
   GODOT_VERSION: "4.7.2-stable"
-  GODOT_CPP_BRANCH: "4.7"
+  GODOT_CPP_REF: "master"
+  GODOT_CPP_API_VERSION: "4.7"
 
   ANDROID_API: "35"
   ANDROID_BUILD_TOOLS: "35.0.0"
@@ -167,7 +168,7 @@ jobs:
       # NO USER ACTION
       # ==========================================================
 
-      - name: Download godot-cpp 4.7
+      - name: Download godot-cpp
 
         shell: bash
 
@@ -175,26 +176,34 @@ jobs:
 
           set -euo pipefail
 
-          echo "Downloading godot-cpp..."
+          echo "=========================================================="
+          echo " Download godot-cpp"
+          echo "=========================================================="
 
           rm -rf godot-cpp
 
           git clone \
             --depth 1 \
-            --branch "${GODOT_CPP_BRANCH}" \
+            --branch "${GODOT_CPP_REF}" \
             https://github.com/godotengine/godot-cpp.git \
             godot-cpp
-
-          echo ""
-          echo "godot-cpp downloaded."
 
           test -d godot-cpp
 
           test -f godot-cpp/SConstruct
 
           echo ""
-          echo "godot-cpp/SConstruct found."
+          echo "godot-cpp downloaded successfully."
 
+          echo ""
+          echo "godot-cpp commit:"
+
+          git -C godot-cpp rev-parse HEAD
+
+          echo ""
+          echo "godot-cpp branch/ref:"
+
+          git -C godot-cpp branch --show-current
 
       # ==========================================================
       # 09 - VERIFY GODOT-CPP API
@@ -320,7 +329,7 @@ jobs:
             arch="${ARCH}" \
             target="${TARGET}" \
             precision="${PRECISION}" \
-            api_version="4.7" \
+            api_version="${GODOT_CPP_API_VERSION}" \
             -j2
 
           echo ""
