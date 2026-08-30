@@ -1,1 +1,10 @@
+[configuration]
 
+entry_symbol = "aoi_native_library_init"
+compatibility_minimum = "4.7"
+compatibility_maximum = "4.8"
+reloadable = true
+
+[libraries]
+
+android.release.arm64 = "res://bin/android/libaoi_native.android.template_release.arm64.so"
