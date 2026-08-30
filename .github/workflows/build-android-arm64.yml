@@ -1,100 +1,59 @@
-name: Build C++ GDExtension - Godot 4.7.2 - Android ARM64
+name: Build C++ GDExtension - Godot 4.7.2 Android ARM64
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - "**"
 
   pull_request:
 
-  workflow_dispatch:
-
 permissions:
   contents: read
 
 env:
   GODOT_VERSION: "4.7.2-stable"
-  GODOT_CPP_API_VERSION: "4.7"
+  GODOT_CPP_BRANCH: "4.7"
 
-  ANDROID_PLATFORM: "android-35"
+  ANDROID_API: "35"
   ANDROID_BUILD_TOOLS: "35.0.0"
   ANDROID_NDK_VERSION: "28.0.13004108"
 
   JAVA_VERSION: "17"
 
+  PLATFORM: "android"
+  ARCH: "arm64"
   TARGET: "template_release"
   PRECISION: "single"
-  ARCH: "arm64"
 
 jobs:
 
-  build-android-arm64:
+  build:
 
-    name: Android ARM64 Release
+    name: Build Android ARM64 .so
 
     runs-on: ubuntu-24.04
 
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
 
-      # ============================================================
-      # 1. CHECKOUT
-      # ============================================================
+      # ==========================================================
+      # 01 - CHECKOUT GAME PROJECT
+      # ==========================================================
 
-      - name: Checkout repository
+      - name: Checkout game project
 
         uses: actions/checkout@v4
 
         with:
-          fetch-depth: 0
-          submodules: false
+          fetch-depth: 1
 
 
-      # ============================================================
-      # 2. INITIALIZE GODOT-CPP
-      # ============================================================
-
-      - name: Initialize godot-cpp
-
-        shell: bash
-
-        run: |
-
-          set -euo pipefail
-
-          echo "Initializing git submodules..."
-
-          git submodule sync --recursive
-
-          git submodule update --init --recursive
-
-          echo ""
-          echo "Checking godot-cpp..."
-
-          test -d godot-cpp
-
-          test -f godot-cpp/SConstruct
-
-          echo "godot-cpp initialized successfully."
-
-
-      # ============================================================
-      # 3. JAVA 17
-      # ============================================================
-
-      - name: Setup Java 17
-
-        uses: actions/setup-java@v4
-
-        with:
-          distribution: temurin
-          java-version: "17"
-
-
-      # ============================================================
-      # 4. PYTHON
-      # ============================================================
+      # ==========================================================
+      # 02 - INSTALL PYTHON
+      # ==========================================================
 
       - name: Setup Python
 
@@ -104,20 +63,33 @@ jobs:
           python-version: "3.12"
 
 
-      # ============================================================
-      # 5. ANDROID SDK
-      # ============================================================
+      # ==========================================================
+      # 03 - INSTALL JAVA
+      # ==========================================================
+
+      - name: Setup Java 17
+
+        uses: actions/setup-java@v4
+
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+
+      # ==========================================================
+      # 04 - INSTALL ANDROID SDK
+      # ==========================================================
 
       - name: Setup Android SDK
 
         uses: android-actions/setup-android@v3
 
 
-      # ============================================================
-      # 6. ANDROID SDK / NDK
-      # ============================================================
+      # ==========================================================
+      # 05 - INSTALL ANDROID PLATFORM / NDK
+      # ==========================================================
 
-      - name: Install Android SDK / NDK
+      - name: Install Android SDK components
 
         shell: bash
 
@@ -125,11 +97,11 @@ jobs:
 
           set -euo pipefail
 
-          sdkmanager --licenses > /dev/null || true
+          echo "Installing Android SDK components..."
 
-          sdkmanager \
+          sdkmanager --install \
             "platform-tools" \
-            "${ANDROID_PLATFORM}" \
+            "platforms;android-${ANDROID_API}" \
             "build-tools;${ANDROID_BUILD_TOOLS}" \
             "ndk;${ANDROID_NDK_VERSION}"
 
@@ -137,14 +109,14 @@ jobs:
 
           echo "ANDROID_NDK_HOME=${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}" >> "$GITHUB_ENV"
 
-          echo "ANDROID_HOME=${ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+          echo "Android SDK installation complete."
 
 
-      # ============================================================
-      # 7. VERIFY TOOLCHAIN
-      # ============================================================
+      # ==========================================================
+      # 06 - VERIFY ANDROID NDK
+      # ==========================================================
 
-      - name: Verify Android toolchain
+      - name: Verify Android NDK
 
         shell: bash
 
@@ -152,40 +124,112 @@ jobs:
 
           set -euo pipefail
 
-          echo "Java:"
-          java -version
-
-          echo ""
-          echo "Python:"
-          python --version
-
-          echo ""
-          echo "SCons:"
-          python -m pip install --upgrade pip
-          python -m pip install "scons>=4.4,<5"
-          scons --version
-
-          echo ""
-          echo "Android SDK:"
-          echo "${ANDROID_SDK_ROOT}"
-
-          echo ""
-          echo "Android NDK:"
+          echo "NDK:"
           echo "${ANDROID_NDK_ROOT}"
 
           test -d "${ANDROID_NDK_ROOT}"
 
-          test -f "${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+          test -f \
+            "${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+
+          test -f \
+            "${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+
+          echo "Android NDK OK."
+
+
+      # ==========================================================
+      # 07 - INSTALL SCONS
+      # ==========================================================
+
+      - name: Install SCons
+
+        shell: bash
+
+        run: |
+
+          set -euo pipefail
+
+          python -m pip install --upgrade pip
+
+          python -m pip install \
+            "scons>=4.4,<5"
+
+          scons --version
+
+
+      # ==========================================================
+      # 08 - DOWNLOAD GODOT-CPP DIRECTLY
+      #
+      # IMPORTANT:
+      # NO GIT SUBMODULE
+      # NO LOCAL MACHINE
+      # NO USER ACTION
+      # ==========================================================
+
+      - name: Download godot-cpp 4.7
+
+        shell: bash
+
+        run: |
+
+          set -euo pipefail
+
+          echo "Downloading godot-cpp..."
+
+          rm -rf godot-cpp
+
+          git clone \
+            --depth 1 \
+            --branch "${GODOT_CPP_BRANCH}" \
+            https://github.com/godotengine/godot-cpp.git \
+            godot-cpp
 
           echo ""
-          echo "Android toolchain OK."
+          echo "godot-cpp downloaded."
+
+          test -d godot-cpp
+
+          test -f godot-cpp/SConstruct
+
+          echo ""
+          echo "godot-cpp/SConstruct found."
 
 
-      # ============================================================
-      # 8. PROJECT VALIDATION
-      # ============================================================
+      # ==========================================================
+      # 09 - VERIFY GODOT-CPP API
+      # ==========================================================
 
-      - name: Verify project
+      - name: Verify godot-cpp API
+
+        shell: bash
+
+        run: |
+
+          set -euo pipefail
+
+          echo "Checking supported API versions..."
+
+          grep -n \
+            'supported_api_versions' \
+            godot-cpp/tools/godotcpp.py
+
+          echo ""
+
+          grep -n \
+            '"4.7"' \
+            godot-cpp/tools/godotcpp.py
+
+          echo ""
+
+          echo "godot-cpp API 4.7 verified."
+
+
+      # ==========================================================
+      # 10 - VERIFY PROJECT STRUCTURE
+      # ==========================================================
+
+      - name: Verify project structure
 
         shell: bash
 
@@ -198,11 +242,28 @@ jobs:
           bash scripts/verify_project.sh
 
 
-      # ============================================================
-      # 9. SCONS CACHE
-      # ============================================================
+      # ==========================================================
+      # 11 - PREPARE BUILD DIRECTORY
+      # ==========================================================
 
-      - name: Restore SCons cache
+      - name: Prepare build directories
+
+        shell: bash
+
+        run: |
+
+          set -euo pipefail
+
+          mkdir -p project/bin/android
+
+          mkdir -p .scons_cache
+
+
+      # ==========================================================
+      # 12 - CACHE GODOT-CPP / SCONS
+      # ==========================================================
+
+      - name: Cache SCons
 
         uses: actions/cache@v4
 
@@ -213,58 +274,64 @@ jobs:
             godot-cpp/bin
             godot-cpp/gen
 
-          key: >
-            godot-cpp-4.7.2-
+          key: >-
+            godot-cpp-4.7-
             android-
             arm64-
-            ${{ hashFiles('.gitmodules') }}-
             ${{ hashFiles('src/**/*.cpp', 'src/**/*.h', 'SConstruct') }}
 
           restore-keys: |
-            godot-cpp-4.7.2-android-arm64-
+            godot-cpp-4.7-android-arm64-
 
 
-      # ============================================================
-      # 10. BUILD
-      # ============================================================
+      # ==========================================================
+      # 13 - BUILD C++
+      # ==========================================================
 
-      - name: Build Android ARM64 GDExtension
+      - name: Build native C++ GDExtension
 
         shell: bash
 
         env:
 
-          SCONS_CACHE:
-            ${{ github.workspace }}/.scons_cache
+          SCONS_CACHE: ${{ github.workspace }}/.scons_cache
 
         run: |
 
           set -euo pipefail
 
-          echo "============================================================"
-          echo "Building C++ GDExtension"
+          echo ""
+          echo "=========================================================="
+          echo " C++ NATIVE BUILD"
+          echo "=========================================================="
+
           echo "Godot       : ${GODOT_VERSION}"
-          echo "godot-cpp   : API ${GODOT_CPP_API_VERSION}"
-          echo "Platform    : Android"
-          echo "Architecture: ARM64"
+          echo "godot-cpp   : ${GODOT_CPP_BRANCH}"
+          echo "Platform    : ${PLATFORM}"
+          echo "Architecture: ${ARCH}"
           echo "Target      : ${TARGET}"
           echo "Precision   : ${PRECISION}"
-          echo "============================================================"
+
+          echo "=========================================================="
+          echo ""
 
           scons \
-            platform=android \
-            arch=${ARCH} \
-            target=${TARGET} \
-            precision=${PRECISION} \
-            api_version=${GODOT_CPP_API_VERSION} \
+            platform="${PLATFORM}" \
+            arch="${ARCH}" \
+            target="${TARGET}" \
+            precision="${PRECISION}" \
+            api_version="4.7" \
             -j2
 
+          echo ""
+          echo "C++ compilation finished."
 
-      # ============================================================
-      # 11. LOCATE OUTPUT
-      # ============================================================
 
-      - name: Locate shared library
+      # ==========================================================
+      # 14 - FIND GENERATED SO
+      # ==========================================================
+
+      - name: Find generated shared library
 
         shell: bash
 
@@ -272,7 +339,7 @@ jobs:
 
           set -euo pipefail
 
-          echo "Searching generated .so files..."
+          echo "Searching for generated .so..."
 
           find . \
             -type f \
@@ -282,15 +349,37 @@ jobs:
           echo ""
 
           test -f \
+            "bin/android/libaoi_native.android.template_release.arm64.so"
+
+
+      # ==========================================================
+      # 15 - COPY SO INTO GODOT PROJECT
+      # ==========================================================
+
+      - name: Install .so into Godot project
+
+        shell: bash
+
+        run: |
+
+          set -euo pipefail
+
+          mkdir -p project/bin/android
+
+          cp \
+            "bin/android/libaoi_native.android.template_release.arm64.so" \
+            "project/bin/android/libaoi_native.android.template_release.arm64.so"
+
+          test -f \
             "project/bin/android/libaoi_native.android.template_release.arm64.so"
 
           echo ""
-          echo "Native library found."
+          echo "Native library installed into Godot project."
 
 
-      # ============================================================
-      # 12. VERIFY ELF
-      # ============================================================
+      # ==========================================================
+      # 16 - VERIFY ELF
+      # ==========================================================
 
       - name: Verify ARM64 ELF
 
@@ -302,8 +391,10 @@ jobs:
 
           LIB="project/bin/android/libaoi_native.android.template_release.arm64.so"
 
-          echo "Checking:"
-          echo "${LIB}"
+          echo ""
+          echo "=========================================================="
+          echo " ELF VALIDATION"
+          echo "=========================================================="
 
           file "${LIB}"
 
@@ -315,19 +406,23 @@ jobs:
 
           echo ""
 
-          echo "Checking ARM64 architecture..."
+          if file "${LIB}" | grep -Eiq \
+            "ARM aarch64|ARM64|aarch64"; then
 
-          file "${LIB}" | grep -Ei \
-            "ARM aarch64|ARM64|aarch64"
+            echo "ARM64 ELF: PASS"
 
-          echo ""
+          else
 
-          echo "ELF validation passed."
+            echo "ERROR: Generated library is NOT ARM64."
+
+            exit 1
+
+          fi
 
 
-      # ============================================================
-      # 13. VERIFY GDEXTENSION DESCRIPTOR
-      # ============================================================
+      # ==========================================================
+      # 17 - VERIFY GDEXTENSION
+      # ==========================================================
 
       - name: Verify GDExtension descriptor
 
@@ -342,6 +437,14 @@ jobs:
           test -f "${FILE}"
 
           grep -q \
+            'entry_symbol = "aoi_native_library_init"' \
+            "${FILE}"
+
+          grep -q \
+            'compatibility_minimum = "4.7"' \
+            "${FILE}"
+
+          grep -q \
             'android.release.arm64' \
             "${FILE}"
 
@@ -349,14 +452,14 @@ jobs:
             'libaoi_native.android.template_release.arm64.so' \
             "${FILE}"
 
-          echo "GDExtension descriptor OK."
+          echo "GDExtension descriptor: PASS"
 
 
-      # ============================================================
-      # 14. SHOW SIZE
-      # ============================================================
+      # ==========================================================
+      # 18 - CHECK SIZE
+      # ==========================================================
 
-      - name: Native library size
+      - name: Report native library size
 
         shell: bash
 
@@ -366,16 +469,21 @@ jobs:
 
           LIB="project/bin/android/libaoi_native.android.template_release.arm64.so"
 
+          echo ""
+          echo "Native .so size:"
+
           ls -lh "${LIB}"
+
+          echo ""
 
           du -h "${LIB}"
 
 
-      # ============================================================
-      # 15. PACKAGE
-      # ============================================================
+      # ==========================================================
+      # 19 - PACKAGE
+      # ==========================================================
 
-      - name: Package artifact
+      - name: Create release package
 
         shell: bash
 
@@ -385,30 +493,35 @@ jobs:
 
           rm -rf dist
 
-          mkdir -p dist/android/arm64
+          mkdir -p \
+            dist/android/arm64
 
           cp \
-            project/bin/android/libaoi_native.android.template_release.arm64.so \
-            dist/android/arm64/
+            "project/bin/android/libaoi_native.android.template_release.arm64.so" \
+            "dist/android/arm64/"
 
           cp \
-            project/bin/aoi_native.gdextension \
-            dist/
+            "project/bin/aoi_native.gdextension" \
+            "dist/"
 
           cp \
-            README.md \
-            dist/
+            "project/project.godot" \
+            "dist/"
+
+          cp \
+            "README.md" \
+            "dist/"
 
           tar \
             -C dist \
             -czf \
-            aoi-native-godot-4.7.2-android-arm64.tar.gz \
+            "aoi-native-godot-4.7.2-android-arm64.tar.gz" \
             .
 
 
-      # ============================================================
-      # 16. UPLOAD .SO
-      # ============================================================
+      # ==========================================================
+      # 20 - UPLOAD .SO
+      # ==========================================================
 
       - name: Upload Android ARM64 .so
 
@@ -416,8 +529,7 @@ jobs:
 
         with:
 
-          name:
-            aoi-native-godot-4.7.2-android-arm64
+          name: "godot-4.7.2-cpp-android-arm64-so"
 
           path: |
             project/bin/android/libaoi_native.android.template_release.arm64.so
@@ -426,9 +538,9 @@ jobs:
           if-no-files-found: error
 
 
-      # ============================================================
-      # 17. UPLOAD COMPLETE PACKAGE
-      # ============================================================
+      # ==========================================================
+      # 21 - UPLOAD COMPLETE PACKAGE
+      # ==========================================================
 
       - name: Upload complete package
 
@@ -436,10 +548,53 @@ jobs:
 
         with:
 
-          name:
-            aoi-native-package-godot-4.7.2-android-arm64
+          name: "godot-4.7.2-cpp-android-arm64-package"
 
-          path:
+          path: |
             dist/aoi-native-godot-4.7.2-android-arm64.tar.gz
 
           if-no-files-found: error
+
+
+      # ==========================================================
+      # 22 - FINAL
+      # ==========================================================
+
+      - name: Build complete
+
+        shell: bash
+
+        run: |
+
+          echo ""
+          echo "=========================================================="
+          echo " BUILD SUCCESS"
+          echo "=========================================================="
+
+          echo ""
+          echo "Godot:"
+          echo "  4.7.2"
+
+          echo ""
+          echo "Native:"
+          echo "  C++ / GDExtension"
+
+          echo ""
+          echo "Platform:"
+          echo "  Android"
+
+          echo ""
+          echo "ABI:"
+          echo "  arm64-v8a"
+
+          echo ""
+          echo "Target:"
+          echo "  template_release"
+
+          echo ""
+          echo "Output:"
+          echo "  project/bin/android/"
+          echo "  libaoi_native.android.template_release.arm64.so"
+
+          echo ""
+          echo "==========================================================" 
