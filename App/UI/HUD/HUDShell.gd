@@ -2,10 +2,10 @@ class_name HUDShell
 extends Control
 
 @export var input_service_path: NodePath
-@export var gate_path: NodePath
+@export var flow_path: NodePath
 
 var _input_service: InputService
-var _gate: NetworkGate
+var _flow: AppFlowCoordinator
 var _debug_label: Label
 var _move_stick: TouchStick
 
@@ -14,28 +14,28 @@ func _ready() -> void:
     visible = false
 
     _input_service = get_node_or_null(input_service_path) as InputService
-    _gate = get_node_or_null(gate_path) as NetworkGate
+    _flow = get_node_or_null(flow_path) as AppFlowCoordinator
 
     if _input_service == null:
         push_error("HUDShell: InputService is missing.")
         return
 
-    if _gate == null:
-        push_error("HUDShell: NetworkGate is missing.")
+    if _flow == null:
+        push_error("HUDShell: AppFlowCoordinator is missing.")
         return
 
     _build_ui()
 
     _input_service.action_pressed.connect(_on_action_pressed_debug)
-    _gate.state_changed.connect(_on_gate_state_changed)
+    _flow.flow_state_changed.connect(_on_flow_state_changed)
 
-    _on_gate_state_changed(_gate.get_current_state())
+    _on_flow_state_changed(_flow.get_current_state(), _flow.get_current_message())
 
-func _on_gate_state_changed(new_state: int) -> void:
-    var validated: bool = new_state == NetworkState.State.VALIDATED
-    visible = validated
+func _on_flow_state_changed(state: int, _message: String) -> void:
+    var ready: bool = state == AppFlowState.State.READY
+    visible = ready
 
-    if not validated and _input_service != null:
+    if not ready and _input_service != null:
         _input_service.reset()
 
 func _on_action_pressed_debug(action_id: int) -> void:
