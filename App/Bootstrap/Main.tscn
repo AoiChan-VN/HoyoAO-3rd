@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://App/Bootstrap/NetworkGate.gd" id="1"]
 [ext_resource type="Script" path="res://App/Runtime/AppFlowCoordinator.gd" id="2"]
 [ext_resource type="Script" path="res://App/Input/InputService.gd" id="3"]
 [ext_resource type="Script" path="res://App/UI/HUD/HUDShell.gd" id="4"]
 [ext_resource type="Script" path="res://App/UI/App/AppGateUI.gd" id="5"]
+[ext_resource type="Script" path="res://App/Runtime/GameLoopCoordinator.gd" id="6"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1")
@@ -12,6 +13,11 @@ script = ExtResource("1")
 [node name="AppFlowCoordinator" type="Node" parent="."]
 script = ExtResource("2")
 network_gate_path = NodePath("..")
+
+[node name="GameLoopCoordinator" type="Node" parent="."]
+script = ExtResource("6")
+app_flow_path = NodePath("../AppFlowCoordinator")
+default_character_id = StringName("player_base")
 
 [node name="InputService" type="Node" parent="."]
 script = ExtResource("3")
