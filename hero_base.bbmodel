@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "format_version": "4.9",
+    "model_format": "free",
+    "box_uv": false,
+    "creation_time": 1758412800000,
+    "bb_version": "4.9.0"
+  },
+  "name": "hero_base",
+  "elements": [
+    {"name":"torso","uuid":"e-torso","from":[-2.5,10,-1.5],"to":[2.5,14,1.5],"shade":true,"faces":{
+      "north":{"uv":[0,0,5,4],"texture":0},"south":{"uv":[6,0,11,4],"texture":0},
+      "east":{"uv":[12,0,15,4],"texture":0},"west":{"uv":[16,0,19,4],"texture":0},
+      "up":{"uv":[0,5,5,8],"texture":0},"down":{"uv":[6,5,11,8],"texture":0}}},
+    {"name":"pelvis","uuid":"e-pelvis","from":[-2,8,-1.5],"to":[2,10,1.5],"shade":true,"faces":{
+      "north":{"uv":[20,0,24,2],"texture":0},"south":{"uv":[25,0,29,2],"texture":0},
+      "east":{"uv":[30,0,33,2],"texture":0},"west":{"uv":[34,0,37,2],"texture":0},
+      "up":{"uv":[20,3,24,6],"texture":0},"down":{"uv":[25,3,29,6],"texture":0}}},
+    {"name":"neck","uuid":"e-neck","from":[-1,14,-1],"to":[1,15,1],"shade":true,"faces":{
+      "north":{"uv":[54,0,56,1],"texture":0},"south":{"uv":[57,0,59,1],"texture":0},
+      "east":{"uv":[60,0,62,1],"texture":0},"west":{"uv":[54,2,56,3],"texture":0},
+      "up":{"uv":[57,2,59,4],"texture":0},"down":{"uv":[60,2,62,4],"texture":0}}},
+    {"name":"head","uuid":"e-head","from":[-1.5,15,-1.5],"to":[1.5,18,1.5],"shade":true,"faces":{
+      "north":{"uv":[38,0,41,3],"texture":0},"south":{"uv":[42,0,45,3],"texture":0},
+      "east":{"uv":[46,0,49,3],"texture":0},"west":{"uv":[50,0,53,3],"texture":0},
+      "up":{"uv":[38,4,41,7],"texture":0},"down":{"uv":[42,4,45,7],"texture":0}}},
+    {"name":"upper_arm_L","uuid":"e-upperarm-l","from":[2.5,12,-0.5],"to":[3.5,14,0.5],"shade":true,"faces":{
+      "north":{"uv":[34,9,35,11],"texture":0},"south":{"uv":[36,9,37,11],"texture":0},
+      "east":{"uv":[38,9,39,11],"texture":0},"west":{"uv":[40,9,41,11],"texture":0},
+      "up":{"uv":[34,12,35,13],"texture":0},"down":{"uv":[36,12,37,13],"texture":0}}},
+    {"name":"lower_arm_L","uuid":"e-lowerarm-l","from":[2.5,10,-0.5],"to":[3.5,12,0.5],"shade":true,"faces":{
+      "north":{"uv":[42,9,43,11],"texture":0},"south":{"uv":[44,9,45,11],"texture":0},
+      "east":{"uv":[46,9,47,11],"texture":0},"west":{"uv":[48,9,49,11],"texture":0},
+      "up":{"uv":[42,12,43,13],"texture":0},"down":{"uv":[44,12,45,13],"texture":0}}},
+    {"name":"hand_L","uuid":"e-hand-l","from":[2.5,9,-0.5],"to":[3.5,10,0.5],"shade":true,"faces":{
+      "north":{"uv":[50,9,51,10],"texture":0},"south":{"uv":[52,9,53,10],"texture":0},
+      "east":{"uv":[54,9,55,10],"texture":0},"west":{"uv":[56,9,57,10],"texture":0},
+      "up":{"uv":[50,11,51,12],"texture":0},"down":{"uv":[52,11,53,12],"texture":0}}},
+    {"name":"thigh_L","uuid":"e-thigh-l","from":[0.5,4,-1],"to":[2.5,8,1],"shade":true,"faces":{
+      "north":{"uv":[0,9,2,13],"texture":0},"south":{"uv":[3,9,5,13],"texture":0},
+      "east":{"uv":[6,9,8,13],"texture":0},"west":{"uv":[9,9,11,13],"texture":0},
+      "up":{"uv":[0,14,2,16],"texture":0},"down":{"uv":[3,14,5,16],"texture":0}}},
+    {"name":"shin_L","uuid":"e-shin-l","from":[0.75,1,-0.75],"to":[1.75,5,0.75],"shade":true,"faces":{
+      "north":{"uv":[12,9,13,13],"texture":0},"south":{"uv":[14,9,15,13],"texture":0},
+      "east":{"uv":[16,9,17,13],"texture":0},"west":{"uv":[18,9,19,13],"texture":0},
+      "up":{"uv":[12,14,13,15],"texture":0},"down":{"uv":[14,14,15,15],"texture":0}}},
+    {"name":"foot_L","uuid":"e-foot-l","from":[0.5,0,-1],"to":[2.5,1,2],"shade":true,"faces":{
+      "north":{"uv":[20,9,22,10],"texture":0},"south":{"uv":[23,9,25,10],"texture":0},
+      "east":{"uv":[26,9,29,10],"texture":0},"west":{"uv":[30,9,33,10],"texture":0},
+      "up":{"uv":[20,11,22,14],"texture":0},"down":{"uv":[23,11,25,14],"texture":0}}}
+  ],
+  "outliner": [
+    {"name":"Body","uuid":"g-body","isOpen":true,"children":[
+      {"name":"body_core","uuid":"g-body-core","isOpen":true,"children":[]},
+      {"name":"body_base","uuid":"g-body-base","isOpen":true,"children":[]}
+    ]},
+    {"name":"Head","uuid":"g-head","isOpen":true,"children":[
+      "e-head",
+      {"name":"face","uuid":"g-face","isOpen":true,"children":[]}
+    ]},
+    {"name":"Hair","uuid":"g-hair","isOpen":true,"children":[
+      {"name":"hair_main","uuid":"g-hair-main","isOpen":true,"children":[]},
+      {"name":"hair_back","uuid":"g-hair-back","isOpen":true,"children":[]},
+      {"name":"hair_front","uuid":"g-hair-front","isOpen":true,"children":[]},
+      {"name":"hair_side_L","uuid":"g-hair-sl","isOpen":true,"children":[]},
+      {"name":"hair_side_R","uuid":"g-hair-sr","isOpen":true,"children":[]}
+    ]},
+    {"name":"Upper","uuid":"g-upper","isOpen":true,"children":[
+      "e-torso",
+      {"name":"chest","uuid":"g-chest","isOpen":true,"children":[]},
+      "e-neck",
+      {"name":"shoulder_L","uuid":"g-sh-l","isOpen":true,"children":[]},
+      {"name":"shoulder_R","uuid":"g-sh-r","isOpen":true,"children":[]},
+      {"name":"arm_L","uuid":"g-arm-l","isOpen":true,"children":["e-upperarm-l","e-lowerarm-l"]},
+      {"name":"arm_R","uuid":"g-arm-r","isOpen":true,"children":[]},
+      {"name":"hand_L","uuid":"g-hand-l","isOpen":true,"children":["e-hand-l"]},
+      {"name":"hand_R","uuid":"g-hand-r","isOpen":true,"children":[]}
+    ]},
+    {"name":"Lower","uuid":"g-lower","isOpen":true,"children":[
+      {"name":"waist","uuid":"g-waist","isOpen":true,"children":[]},
+      "e-pelvis",
+      {"name":"leg_L","uuid":"g-leg-l","isOpen":true,"children":["e-thigh-l","e-shin-l"]},
+      {"name":"leg_R","uuid":"g-leg-r","isOpen":true,"children":[]},
+      {"name":"foot_L","uuid":"g-foot-l","isOpen":true,"children":["e-foot-l"]},
+      {"name":"foot_R","uuid":"g-foot-r","isOpen":true,"children":[]}
+    ]},
+    {"name":"Cloth","uuid":"g-cloth","isOpen":true,"children":[
+      {"name":"coat","uuid":"g-coat","isOpen":true,"children":[]},
+      {"name":"skirt","uuid":"g-skirt","isOpen":true,"children":[]},
+      {"name":"cape","uuid":"g-cape","isOpen":true,"children":[]},
+      {"name":"belt","uuid":"g-belt","isOpen":true,"children":[]},
+      {"name":"cloth_accessory","uuid":"g-cloth-acc","isOpen":true,"children":[]}
+    ]},
+    {"name":"Weapon","uuid":"g-weapon","isOpen":true,"children":[
+      {"name":"weapon_main","uuid":"g-wpn-main","isOpen":true,"children":[]},
+      {"name":"weapon_sub","uuid":"g-wpn-sub","isOpen":true,"children":[]},
+      {"name":"weapon_effect","uuid":"g-wpn-fx","isOpen":true,"children":[]}
+    ]},
+    {"name":"Accessory","uuid":"g-acc","isOpen":true,"children":[]}
+  ],
+  "textures": [
+    {"name":"albedo","id":"albedo","uuid":"t-albedo","source":"","saved":true,"uv_width":64,"uv_height":64}
+  ],
+  "animations": []
+}
